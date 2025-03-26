@@ -12,11 +12,11 @@ This repository contains the code and documentation for the panoptic Segmentatio
 
 | Team Member | Contributions |  
 |-------------|---------------|  
-| Md. Shakib Shahariar Junayed | Did data preprocessing, including mask generation from GeoJSON and overall dataset preparation. |  
-| Muhammad Zubair | Attempted data preparation and augmentation but did not fully implement the process. |  
-| Tamim Ishrak Sanjid | Focused on model training, implemented YOLOv8n-seg, and performed hyperparameter tuning. |  
-| MD. Sakib Sami | Developed the data augmentation pipeline, conducted model evaluation, and performed model testing. |  
-| Sanjida Akter Shorna | Attempted data preparation and augmentation but did not complete the implementation. |
+| Md. Shakib Shahariar Junayed | Handled data preprocessing, including mask generation from GeoJSON and overall dataset preparation. |  
+| Muhammad Zubair | Worked on data preparation and augmentation but did not fully implement the augmentation process. |  
+| Tamim Ishrak Sanjid | Focused on model training, implemented YOLOv8n-seg, and fine-tuned hyperparameters. |  
+| MD. Sakib Sami | Developed the data augmentation pipeline, conducted model evaluation and carried out model testing. |  
+| Sanjida Akter Shorna | Contributed to data preparation and augmentation, though the data preparation was not fully implemented correctly. |
 
 
 ## Data Augmentation Methods
