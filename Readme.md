@@ -21,7 +21,7 @@ This repository contains the completed code, model, and evaluation results for t
 
 ## Network Architecture
 
-Our solution implements a UNet architecture with a ResNet50 encoder pre-trained on ImageNet. This architecture combines the strong feature extraction capabilities of ResNet50 with UNet's precise localization through skip connections.
+Our project implements a UNet architecture with a ResNet50 encoder pre-trained on ImageNet. This architecture combines the strong feature extraction capabilities of ResNet50 with UNet's precise localization through skip connections.
 
 ### Overall Architecture
 
