@@ -1,1 +1,0 @@
-# Sir we will update the readme by today with all the instruction to run

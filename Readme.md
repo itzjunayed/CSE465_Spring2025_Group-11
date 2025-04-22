@@ -1,100 +1,146 @@
-# Panoptic Segmentation of Nuclei in Melanoma
+# Panoptic Segmentation of Nuclei in Melanoma - Final Project
 
-This repository contains the code and documentation for the panoptic Segmentation of Nuclei, which uses YOLOv8n-seg to identify and classify different types of cell nuclei in histopathology images.
+This repository contains the completed code, model, and evaluation results for the panoptic segmentation of nuclei in melanoma histopathology images. We implemented a UNet architecture with ResNet50 encoder to identify and classify different types of cell nuclei.
 
 ## Table of Contents
 - [Team Contribution](#team-contribution)
-- [Data Augmentation Methods](#data-augmentation-methods)
-- [Model Performance](#model-performance)
-- [Project Completion Plan](#project-completion-plan)
+- [Network Architecture](#network-architecture)
+- [Results](#results)
+- [Dataset and Model](#dataset-and-model)
+- [How to Run](#how-to-run)
 
 ## Team Contribution
 
 | Team Member | Contributions |  
 |-------------|---------------|  
-| Md. Shakib Shahariar Junayed | Handled data preprocessing, including mask generation from GeoJSON and overall dataset preparation. |  
-| Muhammad Zubair | Worked on data preparation and augmentation but did not fully implement the augmentation process. |  
-| Tamim Ishrak Sanjid | Focused on model training, implemented YOLOv8n-seg, and fine-tuned hyperparameters. |  
-| MD. Sakib Sami | Developed the data augmentation pipeline, conducted model evaluation and carried out model testing. |  
-| Sanjida Akter Shorna | Contributed to data preparation and augmentation, though the data preparation was not fully implemented correctly. |
+| Md. Shakib Shahariar Junayed | Handled data preprocessing, including mask generation from GeoJSON and overall dataset preparation. Contributed to the model implementation and training script development. |  
+| Muhammad Zubair | Worked on data preparation and augmentation techniques. Assisted with model evaluation and testing pipeline. |  
+| Tamim Ishrak Sanjid | Focused on model architecture design, implemented UNet with ResNet50 backbone, and fine-tuned hyperparameters. Led the model training process. |  
+| MD. Sakib Sami | Developed the data augmentation pipeline, conducted model evaluation, and carried out extensive testing. Created visualizations for result interpretation. |  
+| Sanjida Akter Shorna | Contributed to data preparation, implemented loss functions, and assisted with result analysis. |
 
-#### NOTE: 
-Download the folder using the Google Drive link provided in the Augmented.txt file. Make sure to download it as a folder. Do the same for the link in the model_file.txt file.
+## Network Architecture
 
-## Data Augmentation Methods
+Our solution implements a UNet architecture with a ResNet50 encoder pre-trained on ImageNet. This architecture combines the strong feature extraction capabilities of ResNet50 with UNet's precise localization through skip connections.
 
-To expand the training dataset and improve model robustness, we implemented a comprehensive data augmentation pipeline:
+### Overall Architecture
 
-```python
-augmentation = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomVerticalFlip(p=0.5),
-    transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 2.0)),
-    transforms.ToTensor(),
-])
-```
+![UNet-ResNet50 Architecture](Final-Project/UNet-ResNet50-Architecture.svg)
 
-The augmentation strategy included:
+The architecture consists of:
+- **ResNet50 Encoder**: Pre-trained on ImageNet, provides rich feature hierarchies
+- **Skip Connections**: Preserve spatial information lost during downsampling
+- **UNet Decoder**: Progressively upsamples features while incorporating details from skip connections
+- **Final Layer**: Produces an 11-channel output (10 cell types + background)
 
-1. **Resizing**: All images were standardized to 256×256 pixels for consistent model input.
-2. **Random Horizontal/Vertical Flips**: 50% probability for each direction, enhancing orientation invariance.
-3. **Gaussian Blur**: Applied with varying sigma values (0.1-2.0) to simulate focus variations.
+### Decoder Block Detail
 
-Additional considerations:
-- Used consistent random seeds between image and mask transformations to maintain alignment.
-- Generated 20 augmented variants for each original image-mask pair (Total **4100** image and **4100** mask).
-- Applied identical transformations to both image and mask to preserve spatial relationships.
+![UNet Decoder Block](Final-Project/UNet-Decoder-Block-Detail.svg)
 
-This approach increased our dataset size by 20x (as our original data was only 205 images) while introducing meaningful variations that help the model generalize to unseen data and different conditions.
+Each decoder block:
+1. Upsamples the input features by 2×
+2. Concatenates with corresponding skip connection features
+3. Applies convolution, batch normalization, and ReLU activation
+4. Produces feature maps for the next decoder block or final output
 
-## Model Performance
+### Training Configuration:
 
-We evaluated our YOLOv8n-seg model to ensure robust performance assessment. The table below summarizes the results:
+- **Optimizer:** Adam (lr=1e-4, weight_decay=1e-5)
+- **Training Strategy:** Gradient accumulation (4 steps)
+- **Mixed Precision:** Used to improve training efficiency
+- **Epochs:** 25
+- **Batch Size:** 4
+- **Input Size:** 512 × 512 pixels
+
+## Results
+
+### Training Progress
+
+Our model training showed significant improvement over 25 epochs. Below are the key metrics tracked during training:
+
+| Epoch | Training Loss | Training Accuracy | Validation Loss | Validation Accuracy | Validation F1-Score |
+|-------|---------------|-------------------|-----------------|---------------------|---------------------|
+| 1     | 0.9450        | 0.7455            | 0.6857          | 0.8745              | 0.1518             |
+| 5     | 0.5322        | 0.9174            | 0.5059          | 0.9103              | 0.2886             |
+| 10    | 0.3466        | 0.9451            | 0.4782          | 0.9141              | 0.3992             |
+| 15    | 0.3031        | 0.9505            | 0.4931          | 0.9159              | 0.3842             |
+| 20    | 0.2754        | 0.9528            | 0.5054          | 0.9155              | 0.3942             |
+| 25    | 0.2582        | 0.9603            | 0.5117          | 0.9181              | 0.3770             |
+
+### Final Performance Metrics
+
+After 25 epochs of training, our model achieved the following final results on the validation dataset:
+
+- **Validation Accuracy:** 0.9181
+- **Validation Precision:** 0.4918 (macro average)
+- **Validation Recall:** 0.3474 (macro average)
+- **Validation F1-Score:** 0.3770 (macro average)
+
+The model demonstrates strong overall accuracy due to good background class detection, while specific nuclei classes present varying levels of challenge. We observed that abundant cell types like tumor nuclei and lymphocytes were detected with better precision compared to rarer cell types.
+
+### Training Observations
+
+The training metrics show consistent improvement throughout the training process with:
+- Training accuracy increasing from 74.55% to 96.03%
+- Training loss decreasing from 0.9450 to 0.2582
+
+The validation metrics stabilized around epoch 10, suggesting that the model reached a good balance between underfitting and overfitting. While the validation loss remained relatively stable in later epochs (around 0.51-0.52), the high accuracy indicates that the model performs well on this segmentation task.
+
+## Dataset and Model
+
+- **Dataset:** The dataset contains histopathology images of melanoma with annotated nuclei of different cell types. The dataset is collected from here: [Full Data Link](https://puma.grand-challenge.org/dataset/)
+- **Model:** Due to the large size of the trained model file, it has been uploaded to Google Drive. You can access it using the following link:
+  [Download Model](https://drive.google.com/file/d/1wdGFYMGsaau3QGiPM5Mff45DVq6j6F7J/view?usp=sharing)
+- **Sample Dataset:** A portion of the dataset is uploaded to Google Drive: [Dataset Link](https://drive.google.com/drive/folders/15mGfGGgOxnZntiWyD3r_vwLWg9V6ls8i?usp=sharing)
+
+## How to Run
+
+1. **Folder Structure of Final Project**
+   - Download only the sample dataset and model from the provided Google Drive link
+   - Extract and organize as follows:
+    ```
+     Final-Project/
+     ├── 01_training_dataset_tif_ROIs/
+     │   ├── training_set_metastatic_roi_001.tif
+     │   ├── training_set_metastatic_roi_002.tif
+     │   ├── ...
+     │   └── training_set_metastatic_roi_0015.tif
+     ├── 01_training_dataset_geojson_nuclei/
+     │   ├── training_set_metastatic_roi_001_nuclei.geojson
+     │   ├── training_set_metastatic_roi_002_nuclei.geojson     
+     │   ├── ...
+     │   └── training_set_metastatic_roi_015_nuclei.geojson
+     ├── model_checkpoint_epoch_25.pth
+     ├── process.py
+     ├── test.py
+     ├── train.py
+     ...
+     ...
+
+     ```
+
+2. **Setup Environment:**
+   ```
+   pip install -r requirements.txt
+   ```
+   or
+   ```
+   conda env create -f environment.yml
+   ```
 
 
-### Metrics Breakdown
+3. **Process the data:**
+   - Pre-Process the original dataset as the data masks is in geojson format, else it will not run perfectly.
+     ```
+     python process.py
+     ```
 
-#### Bounding Box Metrics
-| Metric | Value |
-|--------|-------|
-| Precision (B) | 0.1227 |
-| Recall (B) | 0.0590 |
-| Mean Average Precision @ 0.50 (B) | 0.0829 |
-| Mean Average Precision @ 0.50-0.95 (B) | 0.0378 |
+3. **Training:**
+   ```
+   python train.py
+   ```
 
-#### Mask Metrics
-| Metric | Value |
-|--------|-------|
-| Precision (M) | 0.0275 |
-| Recall (M) | 0.0202 |
-| Mean Average Precision @ 0.50 (M) | 0.0187 |
-| Mean Average Precision @ 0.50-0.95 (M) | 0.0050 |
-
-### Calculated F1-Score
-
-#### Bounding Box F1-Score
-F1-Score (B) = 2 * (Precision * Recall) / (Precision + Recall)
-F1-Score (B) = 2 * (0.1227 * 0.0590) / (0.1227 + 0.0590)
-F1-Score (B) = 0.0838
-
-#### Mask F1-Score
-F1-Score (M) = 2 * (Precision * Recall) / (Precision + Recall)
-F1-Score (M) = 2 * (0.0275 * 0.0202) / (0.0275 + 0.0202)
-F1-Score (M) = 0.0239
-
-### Notes
-- (B) represents Bounding Box metrics
-- (M) represents Mask metrics
-- mAP50 indicates Mean Average Precision at IoU = 0.50
-- mAP50-95 indicates Mean Average Precision across IoU thresholds from 0.50 to 0.95
-
-**Additionally, we were not able to perform 5-fold cross validation due to time constraints and computer hardware issues despite being able to write the function without any errors. However, we plan to perform cross validation in the future.**
-
-
-## Project Completion Plan
-
-- The project aims to develop an advanced panoptic segmentation model for melanoma detection, ensuring accurate identification of different skin structures. After successfully training YOLOv8-seg, the next step involves experimenting with more sophisticated architectures to enhance segmentation performance and generalization.
-- To achieve this, we plan to train and evaluate EfficientPS, which is known for its high-precision panoptic segmentation capabilities. Additionally, we will implement Panoptic-DeepLab, a transformer-based segmentation model, to assess its effectiveness in handling complex melanoma segmentation tasks. These models will be compared against YOLOv8-seg to determine the best-performing approach.
-- Also, we were not able to perform 5-fold cross validation due to time constraints and computer hardware issues despite being able to write the function without any errors. However, we plan to perform cross validation in the future.
-- Once the best-performing model is identified, the final phase will focus on optimizing inference time for real-time segmentation and testing its real-world usability. Future improvements may also include self-supervised or semi-supervised learning techniques to enhance performance with limited labeled data. The ultimate goal is to create a high-accuracy, real-world applicable panoptic segmentation model for melanoma diagnosis.
+4. **Testing:**
+   ```
+   python test.py --checkpoint model_checkpoint_epoch_25.pth
+   ```
