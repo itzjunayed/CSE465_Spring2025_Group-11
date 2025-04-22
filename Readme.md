@@ -25,7 +25,7 @@ Our project implements a UNet architecture with a ResNet50 encoder pre-trained o
 
 ### Overall Architecture
 
-![UNet-ResNet50 Architecture](Final-Project/UNet-ResNet50-Architecture.svg)
+![UNet-ResNet50 Architecture](Final_Project/UNet-ResNet50-Architecture.svg)
 
 The architecture consists of:
 - **ResNet50 Encoder**: Pre-trained on ImageNet, provides rich feature hierarchies
@@ -35,7 +35,7 @@ The architecture consists of:
 
 ### Decoder Block Detail
 
-![UNet Decoder Block](Final-Project/UNet-Decoder-Block-Detail.svg)
+![UNet Decoder Block](Final_Project/UNet-Decoder-Block-Detail.svg)
 
 Each decoder block:
 1. Upsamples the input features by 2×
@@ -99,7 +99,7 @@ The validation metrics stabilized around epoch 10, suggesting that the model rea
    - Download only the sample dataset and model from the provided Google Drive link
    - Extract and organize as follows:
     ```
-     Final-Project/
+     Final_Project/
      ├── 01_training_dataset_tif_ROIs/
      │   ├── training_set_metastatic_roi_001.tif
      │   ├── training_set_metastatic_roi_002.tif
